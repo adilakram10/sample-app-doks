@@ -1,28 +1,55 @@
-# Hello Application example
+# Deploy a Containerized Web Application on DigitalOcean Kubernetes Cluster(DOKS)
 
-[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.svg)](https://ssh.cloud.google.com/cloudshell/editor?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/kubernetes-engine-samples&cloudshell_tutorial=cloudshell/tutorial.md&cloudshell_workspace=hello-app)
+The solution involves containerizing web application, building and pushing the docker image, and deploying it on DOKS cluster with horizontal pod autoscalilng(HPA) and load balancing. It will also demonstrate how to add resiliency into the application by automatically scaling to match the demand due to the increasing workload. It will also delve into configuring Horizontal Pod Autoscaling(HPA) to automatically scale the number of pods based on CPU utilization. In order to ensure high availability and scalability of applications it will show how to set up load balancing to distribute the traffic to the kubernetes service.
 
-This example shows how to build and deploy a containerized Go web server
-application using [Kubernetes](https://kubernetes.io).
+## Steps to deploy the application
 
-Visit https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
-to follow the tutorial and deploy this application on [Google Kubernetes
-Engine](https://cloud.google.com/kubernetes-engine).
+-  Create a Dockerfile
 
-This directory contains:
+This Dockerfile contains implementation of a sample web application written in Go called hello-app. You can fork the repo or download it.
 
-- `main.go` contains the HTTP server implementation. It responds to all HTTP
-  requests with a  `Hello, world!` response.
-- `Dockerfile` is used to build the Docker image for the application.
+- Build the Docker image from Dockerfile.
 
-This application is available as two Docker images, which respond to requests
-with different version numbers:
+Before deploying it to the cluster, let’s package the dockerfile as a docker image.
 
-- `us-docker.pkg.dev/google-samples/containers/gke/hello-app:1.0`
-- `us-docker.pkg.dev/google-samples/containers/gke/hello-app:2.0`
+```
+docker build -t hello-app-doks:latest .
+```
 
-This example is used in many official/unofficial tutorials, some of them
-include:
-- [Kubernetes Engine Quickstart](https://cloud.google.com/kubernetes-engine/docs/quickstart)
-- [Kubernetes Engine - Deploying a containerized web application](https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app) tutorial
-- [Kubernetes Engine - Setting up HTTP Load Balancing](https://cloud.google.com/kubernetes-engine/docs/tutorials/http-balancer) tutorial
+- Push the Docker image to Docker hub
+```
+docker tag hello-app-doks:latest adph33145/hello-app-doks:latest
+docker push adph33145/hello-app-doks:latest
+```
+
+- Create a DigitalOcean Kubernetes cluster
+
+- Deploy the application 
+
+Let’s create a kubernetes deployment to run the app on the cluster
+```
+kubectl create deployment hello-app --image=adph33145/hello-app-doks:latest
+```
+- Scale the deployment
+
+You can scale the deployment to 3 replicas and continue to add based on the application usage. 
+```
+kubectl scale deployment hello-app --replicas=3
+```
+
+- Configure Load Balancing
+
+Pods created by the deployment receive an ephemeral IP. You can create a service that can load-balance client connections across all the pods scheduled. The service of type ClusterIP creates a static IP and DNS hostname that can be consumed by the clients within the cluster whereas a service of type Loadbalancer is used to expose the application to external traffic outside the cluster. 
+```
+kubectl expose deployment hello-app --name=hello-app-service --type=LoadBalancer --port 80 --target-port 8080
+```
+
+
+- Configure Horizontal Pod Autoscaling(HPA)
+  Let’s scale the application through HPA ensuring high availability 
+```
+kubectl autoscale deployment hello-app --cpu-percent=80 --min=1 --max=5
+```
+
+
+
