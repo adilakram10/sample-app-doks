@@ -2,6 +2,12 @@
 
 The solution involves containerizing web application, building and pushing the docker image, and deploying it on DOKS cluster with horizontal pod autoscalilng(HPA) and load balancing. It will also demonstrate how to add resiliency into the application by automatically scaling to match the demand due to the increasing workload. It will also delve into configuring Horizontal Pod Autoscaling(HPA) to automatically scale the number of pods based on CPU utilization. In order to ensure high availability and scalability of applications it will show how to set up load balancing to distribute the traffic to the kubernetes service.
 
+The repository contains following files
+
+- `main.go`
+- `Dockerfile`
+- `deploy.yaml`
+
 ## Steps to deploy the application
 
 -  Create a Dockerfile
