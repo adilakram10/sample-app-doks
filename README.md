@@ -24,6 +24,11 @@ docker push adph33145/hello-app-doks:latest
 
 - Create a DigitalOcean Kubernetes cluster
 
+```
+doctl auth init
+doctl kubernetes cluster create --name webapp-doks-cluster --region atl1 --version 1.33.1-do.1 --size s-1vcpu-2gb --count 3
+```
+
 - Deploy the application 
 
 Let’s create a kubernetes deployment to run the app on the cluster
@@ -51,5 +56,4 @@ kubectl expose deployment hello-app --name=hello-app-service --type=LoadBalancer
 kubectl autoscale deployment hello-app --cpu-percent=80 --min=1 --max=5
 ```
 
-
-
+DOKS is a simple, fully managed, cost-effective Kubernetes solution for mid to large scale application deployments and provides a developer friendly platform. You only pay for the underlying resources without needing to worry about K8 control plane billing. It provides a user friendly interface for managing clusters, simplifying cluster provisioning, autoscaling and tuning, and automatic version updates. Free basic support to all users with paid support plans are also available for developers, startups, small to large organizations and enterprises. You can set a cluster autoscaler node pool to scale by specifying the minimum and maximum number of cluster nodes the application requires. 
